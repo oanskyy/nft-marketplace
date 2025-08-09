@@ -1,0 +1,65 @@
+.rindexer
+    generated_csv/**/*.txt
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+
+# Local env files
+.env
+.env.*.local
+.env.local
+
+# Logs
+logs
+*.log
+*.log.*
+yarn-error.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor folders
+.vscode/
+.idea/
+*.swp
+
+# Test / Coverage
+coverage/
+.playwright/
+test-results/
+
+# Dependency caches
+.pnpm-store/
+.npm/
+.cache/
+.next/cache/
+
+# Misc
+*.tgz
+*.zip
+
+# Hardhat / Foundry / Blockchain local files
+artifacts/
+cache/
+typechain/
+typechain-types/
+broadcast/
+
+# Mac Finder
+.AppleDouble
+.LSOverride
+
+# Local database / mock data
+*.sqlite
+*.db
