@@ -21,10 +21,3 @@ export interface NFTQueryResponse {
     allItemCanceleds: { nodes: BoughtCanceledItem[] }
   }
 }
-
-// Lean shape used by UI
-export interface NFTData {
-  tokenId: string
-  contractAddress: string
-  price: string
-}

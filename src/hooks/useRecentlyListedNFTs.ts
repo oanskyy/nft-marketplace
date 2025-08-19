@@ -1,43 +1,53 @@
-import { graphqlFetch } from "@/lib/graphqlClient"
+import { fetchNFTs } from "@/lib/graphqlClient"
 import { useQuery } from "@tanstack/react-query"
-import { GET_RECENT_NFTS } from "../queries/getRecentlyListedNfts.gql"
-import type { NFTData, NFTQueryResponse } from "../types/rindexer"
+import { useMemo } from "react"
+import type { NFTQueryResponse } from "../types/nft"
 
-const MAX_ITEMS = 100
-
+// Custom hook for fetching and processing NFT data
 export function useRecentlyListedNFTs() {
-  return useQuery<NFTQueryResponse, Error, NFTData[]>({
-    queryKey: ["recentNFTs"],
-    queryFn: () => graphqlFetch<NFTQueryResponse>(GET_RECENT_NFTS),
-    staleTime: 5_000,
-    refetchInterval: 10_000,
-    gcTime: 5 * 60 * 1000,
-    select: (raw) => {
-      const bought = new Set<string>()
-      const canceled = new Set<string>()
+    const { data, isLoading, error } = useQuery<NFTQueryResponse>({
+        queryKey: ["recentNFTs"],
+        queryFn: fetchNFTs,
+    })
 
-      for (const it of raw.data.allItemBoughts.nodes) {
-        if (it.nftAddress && it.tokenId) {
-          bought.add(`${it.nftAddress.toLowerCase()}-${it.tokenId}`)
-        }
-      }
-      for (const it of raw.data.allItemCanceleds.nodes) {
-        if (it.nftAddress && it.tokenId) {
-          canceled.add(`${it.nftAddress.toLowerCase()}-${it.tokenId}`)
-        }
-      }
+    // Use useMemo to avoid reprocessing data when it hasn't changed
+    const nftDataList = useMemo(() => {
+        if (!data) return []
 
-      const available = raw.data.allItemListeds.nodes.filter((it) => {
-        if (!it.nftAddress || !it.tokenId) return false
-        const key = `${it.nftAddress.toLowerCase()}-${it.tokenId}`
-        return !bought.has(key) && !canceled.has(key)
-      })
+        // Create sets of bought and canceled NFTs for quick lookup
+        const boughtNFTs = new Set<string>()
+        const canceledNFTs = new Set<string>()
 
-      return available.slice(0, MAX_ITEMS).map<NFTData>((nft) => ({
-        tokenId: nft.tokenId,
-        contractAddress: nft.nftAddress,
-        price: nft.price,
-      }))
-    },
-  })
+        data.data.allItemBoughts.nodes.forEach(item => {
+            if (item.nftAddress && item.tokenId) {
+                boughtNFTs.add(`${item.nftAddress}-${item.tokenId}`)
+            }
+        })
+
+        data.data.allItemCanceleds.nodes.forEach(item => {
+            if (item.nftAddress && item.tokenId) {
+                canceledNFTs.add(`${item.nftAddress}-${item.tokenId}`)
+            }
+        })
+
+        // Filter listed NFTs to only include those that haven't been bought or canceled
+        const availableNFTs = data.data.allItemListeds.nodes.filter(item => {
+            if (!item.nftAddress || !item.tokenId) return false
+
+            const key = `${item.nftAddress}-${item.tokenId}`
+            return !boughtNFTs.has(key) && !canceledNFTs.has(key)
+        })
+
+        // Get the top 5
+        const recentNFTs = availableNFTs.slice(0, 100)
+
+        // Extract the specific data we need
+        return recentNFTs.map(nft => ({
+            tokenId: nft.tokenId,
+            contractAddress: nft.nftAddress,
+            price: nft.price,
+        }))
+    }, [data])
+
+    return { isLoading, error, nftDataList }
 }

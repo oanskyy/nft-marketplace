@@ -1,12 +1,21 @@
-export async function graphqlFetch<TData>(query: string, variables?: Record<string, unknown>) {
-  const res = await fetch("/api/graphql", {
+import { GET_RECENT_NFTS } from "@/queries/getRecentlyListedNfts.gql";
+import { NFTQueryResponse } from "@/types/nft";
+
+export async function fetchNFTs(): Promise<NFTQueryResponse> {
+  // TODO - Implement the actual GraphQL query to fetch NFTs
+  // TODO envvariables for API endpoint
+  const response = await fetch("/api/graphql", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query, variables }),
+    body: JSON.stringify({ query: GET_RECENT_NFTS }),
   })
-  if (!res.ok) {
-    const text = await res.text().catch(() => "")
-    throw new Error(`GraphQL fetch failed (${res.status}): ${text || res.statusText}`)
+  
+  if (!response.ok) {
+    const text = await response.text().catch(() => "")
+    throw new Error(`GraphQL fetch failed (${response.status}): ${text || response.statusText}`)
   }
-  return res.json() as Promise<TData>
+
+  const nfts = await response.json() as Promise<NFTQueryResponse>
+  console.log("GraphQL fetch successful NFTs: ", nfts)
+  return nfts
 }

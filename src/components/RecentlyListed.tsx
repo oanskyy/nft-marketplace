@@ -3,7 +3,7 @@ import { useRecentlyListedNFTs } from "../hooks/useRecentlyListedNFTs"
 import NFTBox from "./NFTBox"
 
 export default function RecentlyListedNFTs() {
-  const { data: nftDataList, isLoading, error } = useRecentlyListedNFTs()
+  const { isLoading, error, nftDataList } = useRecentlyListedNFTs()
 
   if (isLoading) return <p>Loading...</p>
   if (error) return <p>Error: {error.message}</p>
