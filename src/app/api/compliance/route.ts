@@ -42,10 +42,10 @@ export async function POST(request: Request) {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "authorization": `Bearer ${apiKey}`,
+                "Authorization": `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-                idempotencyKey,
+                idempotencyKey: crypto.randomUUID(),
                 address,
                 chain: "ETH-SEPOLIA"
             })
